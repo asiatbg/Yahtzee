@@ -35,8 +35,6 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
-import static yahtzee.Protocol.ONE;
-import static yahtzee.Protocol.TWO;
 
 class YahtzeeClient extends JFrame implements Protocol{
     private JButton bConnect;
@@ -66,6 +64,7 @@ class YahtzeeClient extends JFrame implements Protocol{
     private boolean connected;
     private Socket socket;
     private ClientThread thread;
+     List<Object> movesUsed = new ArrayList<>();
     public YahtzeeClient() throws InterruptedException{
         super("Gra w kości");
         
@@ -301,20 +300,19 @@ class YahtzeeClient extends JFrame implements Protocol{
         @Override
         public void actionPerformed(ActionEvent e) {
             Object source = e.getSource();
-            
             if (source == bConnect)
             {
                 try {     
                    socket = new Socket(SERVER, PORT);
                 } catch (IOException ex) {
-                    System.out.println("linia 306");
                     Logger.getLogger(YahtzeeClient.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 bConnect.setEnabled(false);
                 bDisconnect.setEnabled(true);
                 connected = true; 
                 thread = new ClientThread(socket);
-                thread.start();    
+                thread.start(); 
+                movesUsed.clear();
             }
             if (source == bDisconnect)
             {
@@ -346,11 +344,9 @@ class YahtzeeClient extends JFrame implements Protocol{
                 for (int i = 0; i < 5; i++)
                 {
                     if( checkIfEmpty(dices[i]) )
-                    {
-                        dicesValues[i] = throwDice(dices[i]);
-                        chance2.setVisible(false);
-                    }  
+                    dicesValues[i] = throwDice(dices[i]);   
                 } 
+                chance2.setVisible(false);
             }  
             else if (source == bThrow && bThrowClick == 2)
             {
@@ -358,12 +354,9 @@ class YahtzeeClient extends JFrame implements Protocol{
                 for (int i = 0; i < 5; i++)
                 {
                     if( checkIfEmpty(dices[i]) )
-                    {
-                        dicesValues[i] = throwDice(dices[i]);
-                        chance3.setVisible(false);
-                    }
-                            
-                } 
+                        dicesValues[i] = throwDice(dices[i]);           
+                }
+                chance3.setVisible(false);
                 bThrow.setEnabled(false);
             }    
         }
@@ -400,8 +393,7 @@ class YahtzeeClient extends JFrame implements Protocol{
                 resetDice(dices[4]);
             }
         }   
-    }
-    
+    }    
     
     public int throwDice(JLabel dice){
         int random, diceValue = 0;
@@ -459,6 +451,7 @@ class YahtzeeClient extends JFrame implements Protocol{
         private int row;
         private Object o;
         private String values = "";
+       
         @Override
         public void mouseClicked(MouseEvent e) {
             row = playersTable.rowAtPoint(e.getPoint());
@@ -468,21 +461,36 @@ class YahtzeeClient extends JFrame implements Protocol{
                 values += dicesValues[i];
                 dicesValues[i] = 0;
             }
-            if (!values.startsWith("0") && o.equals("1"))
+           
+            if (movesUsed.contains(o))
             {
+                JOptionPane.showMessageDialog(null,"Kategoria wykorzystana!");
+                if(chance3.isVisible() == false)
+                {
+                    chance3.setVisible(true);
+                    bThrow.setEnabled(true);
+                    bThrowClick = 2;
+                }      
+            }
+            else if (!values.startsWith("0") && o.equals("1"))
+            {  
                 thread.send(ONE, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("2"))
-            {
+            {                
                 thread.send(TWO, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("3"))
             {
                 thread.send(THREE, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("4"))
             {
                 thread.send(FOUR, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("5"))
             {
@@ -491,39 +499,51 @@ class YahtzeeClient extends JFrame implements Protocol{
             else if (!values.startsWith("0") && o.equals("6"))
             {
                 thread.send(SIX, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("1 para"))
             {
                 thread.send(PAIR, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("2 pary"))
             {
                 thread.send(PAIRS, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("trójka"))
             {
                 thread.send(TRIO, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("mały strit"))
             {
                 thread.send(SMALL_STRIT, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("duży strit"))
             {
                 thread.send(BIG_STRIT, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("kareta"))
             {     
                 thread.send(CARRIAGE, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("poker"))
             {        
                 thread.send(POKER, values);
+                restore();
             }
             else if (!values.startsWith("0") && o.equals("szansa"))
             {               
                 thread.send(CHANCE, values);
-            }  
+                restore();
+            } 
+            movesUsed.add(o);   
+        }
+        public void restore(){
             values = "";
             bThrowClick = 0; 
             chance1.setVisible(true);
@@ -531,7 +551,6 @@ class YahtzeeClient extends JFrame implements Protocol{
             chance3.setVisible(true);
             resetAllDices();
         }
-  
     }
     
     private class JTextClickedAdapter extends KeyAdapter{
@@ -550,10 +569,11 @@ class YahtzeeClient extends JFrame implements Protocol{
         private PrintWriter out;
         private String line;
         int counter = 0;
-        List<String> movesUsed = new ArrayList<>();
+       
         public ClientThread (Socket s){
             socket = s;   
         }
+       
         
         @Override
         public void run(){
@@ -757,71 +777,64 @@ class YahtzeeClient extends JFrame implements Protocol{
         public int getIndexValue(String category){
             if(category.equals(ONE))
             {
-                return checkIfEntryExists(ONE) ? 0 : -1;
+                return  0 ;
             }
             else if (category.equals(TWO))
             {
-                return checkIfEntryExists(TWO) ? 1 : -1;
+                return  1 ;
             }
             else if (category.equals(THREE))
             {
-                return checkIfEntryExists(ONE) ? 2 : -1;
+                return  2 ;
             }
             else if (category.equals(FOUR))
             {
-                return checkIfEntryExists(ONE) ? 3 : -1;
+                return  3 ;
             }
             else if (category.equals(FIVE))
             {
-                return checkIfEntryExists(ONE) ? 4 : -1;
+                return 4 ;
             }
             else if (category.equals(SIX))
             {
-                return checkIfEntryExists(ONE) ? 5 : -1;
+                return 5 ;
             }
             else if (category.equals(PAIR))
             {
-                return checkIfEntryExists(ONE) ? 6 : -1;
+                return 6 ;
             }
             else if (category.equals(PAIRS))
             {
-                return checkIfEntryExists(ONE) ? 7 : -1;
+                return 7 ;
             }
             else if (category.equals(TRIO))
             {
-                return checkIfEntryExists(ONE) ? 8 : -1;
+                return 8 ;
             }
             else if (category.equals(SMALL_STRIT))
             {
-                return checkIfEntryExists(ONE) ? 9 : -1;
+                return  9 ;
             }
             else if (category.equals(BIG_STRIT))
             {
-                return checkIfEntryExists(ONE) ? 10 : -1;
+                return  10 ;
             }
             else if (category.equals(CARRIAGE))
             {
-                return checkIfEntryExists(ONE) ? 11 : -1;
+                return  11 ;
             }
             else if (category.equals(POKER))
             {
-                return checkIfEntryExists(ONE) ? 12 : -1;
+                return  12 ;
             }
             else if (category.equals(CHANCE))
             {
-                return checkIfEntryExists(ONE) ? 13 : -1;
+                return   13 ;
             }
             return 17;
         }
         
-        private boolean checkIfEntryExists(String category) {
-                if (!movesUsed.contains(category)) {
-                    movesUsed.add(category);
-                    return true;
-                } else {
-                    return false;
-                }
-        }
+        
         
         public void send(String protocol, String text){
             out.println(protocol + text);

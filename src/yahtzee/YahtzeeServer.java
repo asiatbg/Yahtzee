@@ -527,23 +527,28 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                         }
                         if (line.startsWith(LOGOUT_COMMAND) ) {
                              sendToEveryone("Opuścił czat");
-                             move();
-                             activePlayerIndex--;
                              synchronized(players) {
                                 nicks.remove(nick);
                                 players.remove(this);  
+                            } 
+                            if(!players.isEmpty())
+                            { 
+                                move();
+                                activePlayerIndex--;
                             }
-                            
                         } 
                 }
             }catch(IOException e) {
                 sendToEveryone("Opuścił czat");
-                move();
-                activePlayerIndex--;
                 synchronized(players) {
                    nicks.remove(nick);
                    players.remove(this);  
-               } 
+                }
+                if(!players.isEmpty())
+                { 
+                    move();
+                    activePlayerIndex--;
+                }
             }catch(NullPointerException op) { //System.out.println(op); 
             }finally {
                 try {
