@@ -9,63 +9,34 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
-import java.io.Serializable;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.logging.FileHandler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.logging.SimpleFormatter;
 import java.util.regex.Pattern;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import static yahtzee.Protocol.ADD_COL_COMMAND;
-import static yahtzee.Protocol.CARRIAGE;
-import static yahtzee.Protocol.ONE;
-import static yahtzee.Protocol.PAIRS;
-import static yahtzee.Protocol.POKER;
-import static yahtzee.Protocol.SMALL_STRIT;
-import static yahtzee.Protocol.TRIO;
-
-
  
 public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
-    private JButton start, stop;
+    private JButton start;
     private JPanel panel;
     private JTextField port, textField;
     private JLabel JLPort = new JLabel("Port: ");
     private JLabel JLSend = new JLabel("Wyślij: ");
     private JTextArea statements; 
     private static final int PORT = 2345;
-    private boolean started = false;
-    
+    private boolean started = false;  
     private  Server server;
-    private long startTime, stopTime; 
-    private Logger logger = Logger.getLogger("MyLog");  //utorzenie logu o podanej nazwie
-    private FileHandler fh;  
-    int counter = 0;
+    private int counter = 0;
    
     
     public YahtzeeServer(){
@@ -82,19 +53,13 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
         
         port = new JTextField((new Integer(PORT)).toString(), 8);
         
-        start = new JButton("Uruchom");
-        stop = new JButton("Zatrzymaj");
-        stop.setEnabled(false);
-             
+        start = new JButton("Uruchom");    
         start.addActionListener(this);
-        stop.addActionListener(this);
         
         panel.add(JLPort);
         panel.add(port);
         panel.add(start);
-        panel.add(stop);
         
-
         add(panel, BorderLayout.NORTH);
         add(new JScrollPane(statements), BorderLayout.CENTER);
         
@@ -102,15 +67,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
      
         add(JLSend, BorderLayout.SOUTH);
         add(textField, BorderLayout.SOUTH);
-        
-       
-        try{  
-            fh = new FileHandler(".\\logs.txt" );  //deklaracja "uchwytu" do pliku o podanej nazwie w podanej lokalizacji
-            logger.addHandler(fh); // przypisane uchwutu do obiektu logger
-            SimpleFormatter formatter = new SimpleFormatter();   // formatowanie??
-            fh.setFormatter(formatter);  
-        }catch(IOException e) {}
-        
+               
         setVisible(true);
     } 
 
@@ -122,42 +79,16 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
        {
             server = new Server();
             server.start();
-            startTime = System.currentTimeMillis();
             started = true; 
             start.setEnabled(false);
-            stop.setEnabled(true);
             port.setEnabled(false);
-            
             repaint(); 
                
-       }
-       if (source == stop)
-       {
-           server.kill();
-          
-           started = false; 
-           stop.setEnabled(false);
-           start.setEnabled(true);
-           port.setEnabled(true);
-           repaint();
-       }
-          
+       }   
     }
     private class Server extends Thread {
         private ServerSocket server;
-        
-        Game game;
-        public void kill(){
-        try {
-            server.close();
-               /* for(ConnectionThread client: clients){
-                    client.out.println(LOGOUT_COMMAND + " Serwer przestał działać!");
-                    client.socket.close();
-                }*/
-            displayMessage("Wszystkie Połączenia zostały zakończone.\n");
-        } catch (IOException e) {}
-        }
-        
+        private Game game;
         public void run(){
             try {
                 server = new ServerSocket(new Integer(port.getText()));
@@ -193,11 +124,11 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
     }
     
  class Game implements Protocol {
-    ArrayList<Player> players = new ArrayList<>();
-    ArrayList<String> nicks = new ArrayList<>();
-    ArrayList<Integer> scores = new ArrayList<>();
-    int activePlayerIndex = 0;
-    int startOfTheGame = 0;
+    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<String> nicks = new ArrayList<>();
+    private ArrayList<Integer> scores = new ArrayList<>();
+    private int activePlayerIndex = 0;
+    private int startOfTheGame = 0;
     class Player extends Thread{
         private String[] curses = {"kurwa", "spierdalaj", "zajebiście", "chuj"};
         private Socket socket;
@@ -239,7 +170,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
              }
              return true;        
         }
-        public boolean compare(Player p) {
+        private boolean compare(Player p) {
             return (p.nick.equals(nick));
         }
         private void info() {
@@ -292,12 +223,12 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                 line = line.replace(curse, " ****** ");  
             }       
         }
-          private void sendToEveryone(String text) {
+        private void sendToEveryone(String text) {
             for(Player chat : players) {
                 chat.out.println(POST_COMMAND +" <" + nick + "> " + text);   
             }
         }
-        public void privateMessage(String text){
+        private void privateMessage(String text){
             String nck = "";
             text = text.substring( "/private".length() ).trim();
             for(String nickname : nicks)
@@ -315,17 +246,8 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                 }
             }
 
-        }
-        
-        public void removePlayerColumn(String text){
-            for (Player player : players)  
-            {
-                 if(player != this)
-                    player.out.println(REMOVE_COL_COMMAND + text);                    
-            }          
-        }
-        
-        public void move(){
+        }       
+        private void move(){
             activePlayerIndex++;
             startOfTheGame++; 
             if(activePlayerIndex >= players.size())
@@ -334,7 +256,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
             } 
             checkGameplayOrder(activePlayerIndex, this);     
         }
-        public String prepareDataToSend(String data){
+        private String prepareDataToSend(String data){
             if(data.length() == 1)
             {
                 data += "  ";
@@ -348,11 +270,11 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
             return data;
         }
         
-        public void play(String protocol,  int userScore){
+        private void play(String protocol,  int userScore){
             int sum = 0;
             move();
             sum = userScore + scores.get(players.indexOf(this));
-            scores.add(players.indexOf(this), sum);
+            scores.set(players.indexOf(this), sum);
             String sUserScore =  prepareDataToSend( String.valueOf(userScore) ) ;
             String sSum =  prepareDataToSend(String.valueOf( scores.get(players.indexOf(this))) );
             send(protocol, sUserScore + sSum + nick);   
@@ -605,17 +527,23 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                         }
                         if (line.startsWith(LOGOUT_COMMAND) ) {
                              sendToEveryone("Opuścił czat");
-                            //displayMessage("Czat opuścił: " + nick);
-                            removePlayerColumn(nick);
-                            synchronized(players) {
+                             move();
+                             activePlayerIndex--;
+                             synchronized(players) {
                                 nicks.remove(nick);
                                 players.remove(this);  
                             }
-                            //counter--;
+                            
                         } 
                 }
             }catch(IOException e) {
-                System.out.println(e); 
+                sendToEveryone("Opuścił czat");
+                move();
+                activePlayerIndex--;
+                synchronized(players) {
+                   nicks.remove(nick);
+                   players.remove(this);  
+               } 
             }catch(NullPointerException op) { //System.out.println(op); 
             }finally {
                 try {
