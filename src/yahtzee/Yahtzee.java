@@ -35,6 +35,9 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
+import static yahtzee.Protocol.CHANCE;
+import static yahtzee.Protocol.END_GAME;
+import static yahtzee.Protocol.WINNER;
 
 class YahtzeeClient extends JFrame implements Protocol{
     private JButton bConnect;
@@ -454,24 +457,18 @@ class YahtzeeClient extends JFrame implements Protocol{
        
         @Override
         public void mouseClicked(MouseEvent e) {
+            if (!checkIfDicesWasThrown()) {
+                return;
+            }
             row = playersTable.rowAtPoint(e.getPoint());
             o = playersTable.getValueAt(row, 0);
-            for (int i = 0; i < 5; i++)
-            {
-                values += dicesValues[i];
-                dicesValues[i] = 0;
-            }
+            
            
             if (movesUsed.contains(o))
             {
                 JOptionPane.showMessageDialog(null,"Kategoria wykorzystana!");
-                if(chance3.isVisible() == false)
-                {
-                    chance3.setVisible(true);
-                    bThrow.setEnabled(true);
-                    bThrowClick = 2;
-                }      
-            }
+                return;
+            } 
             else if (!values.startsWith("0") && o.equals("1"))
             {  
                 thread.send(ONE, values);
@@ -541,7 +538,27 @@ class YahtzeeClient extends JFrame implements Protocol{
                 thread.send(CHANCE, values);
                 restore();
             } 
-            movesUsed.add(o);   
+            movesUsed.add(o);  
+            for (int i = 0; i < 5; i++)
+            {
+                values += dicesValues[i];
+                dicesValues[i] = 0;
+            }
+            
+            if (movesUsed.size() >= 14){
+//                JOptionPane.showMessageDialog(null,"Koniec gry!");
+                thread.send(END_GAME, "");
+                
+            }
+        }
+        
+        private boolean checkIfDicesWasThrown() {
+            for (int i = 0; i < 5; i++) {
+                if (dicesValues[i] == 0) {
+                    return false;
+                }
+            }
+            return true;
         }
         public void restore(){
             values = "";
@@ -615,10 +632,13 @@ class YahtzeeClient extends JFrame implements Protocol{
                                 }
                             });
                         }  
-                     if(line.startsWith(PLAY_COMMAND))
-                        {                            
-                           JOptionPane.showMessageDialog(null,"Twoja kolej, graj!");
-                           bThrow.setEnabled(true);
+                        if (line.startsWith(PLAY_COMMAND)) {  
+                            if (movesUsed.size() >= 14) {
+                                thread.send(NEXT_PLAYER, "");
+                            } else {
+                                JOptionPane.showMessageDialog(null,"Twoja kolej, graj!");
+                                bThrow.setEnabled(true);
+                            }
                         }
                      if(line.startsWith(WAIT_COMMAND))
                         {                            
@@ -742,6 +762,12 @@ class YahtzeeClient extends JFrame implements Protocol{
                             int index = getIndexValue(CHANCE);
                             insertPoints(nick, score, sum, index);  
                         }
+                       if (line.startsWith(WINNER)) {
+                           JOptionPane.showMessageDialog(null,"Zwycięstwo!");
+                       }
+                       if (line.startsWith(LOSER)) {
+                           JOptionPane.showMessageDialog(null,"Przegrana!");
+                       }
                 }
             } catch (IOException ex) {
                 Logger.getLogger(YahtzeeClient.class.getName()).log(Level.SEVERE, null, ex);

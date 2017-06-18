@@ -17,6 +17,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,6 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import static yahtzee.Protocol.SUM;
+import static yahtzee.Protocol.WINNER;
  
 public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
     private JButton start;
@@ -66,7 +69,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
         textField = new JTextField();
      
         add(JLSend, BorderLayout.SOUTH);
-        add(textField, BorderLayout.SOUTH);
+        add(textField, BorderLayout.SOUTH); //co to?
                
         setVisible(true);
     } 
@@ -127,6 +130,8 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<String> nicks = new ArrayList<>();
     private ArrayList<Integer> scores = new ArrayList<>();
+    public ArrayList<Integer> sortScores = new ArrayList<>();
+    private int playersDoneCount = 0;
     private int activePlayerIndex = 0;
     private int startOfTheGame = 0;
     class Player extends Thread{
@@ -205,6 +210,19 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                  currentPlayer.out.println(PLAY_COMMAND);
             }
         }
+        
+        private void checkWinner() {
+            int size = scores.size();
+            int winnerIndex = scores.indexOf(Collections.max(scores));
+            
+            for (int i = 0; i < players.size(); i++) {
+                if (i == winnerIndex) {
+                    players.get(i).out.println(WINNER);
+                } else {
+                    players.get(i).out.println(LOSER);    
+                }
+            }
+    }
         
         private void notifayPlayer(int activePlayer){
              for(Player player: players)
@@ -536,7 +554,16 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 move();
                                 activePlayerIndex--;
                             }
-                        } 
+                        }
+                        if (line.startsWith(END_GAME)) {
+                            playersDoneCount++;
+                            if (playersDoneCount == players.size()) {
+                                checkWinner();
+                            }
+                        }
+                        if (line.startsWith(NEXT_PLAYER)) {
+                            move();
+                        }
                 }
             }catch(IOException e) {
                 sendToEveryone("Opuścił czat");

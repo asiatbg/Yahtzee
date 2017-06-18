@@ -17,7 +17,6 @@ public interface Protocol {
     public static final String LOGOUT_COMMAND = "LOGOUT:"; // wylogowanie
     public static final String REMOVE_COL_COMMAND = "REMOVE:"; // usunięcie kolumny 
     public static final String NICK_COMMAND = "NICK:"; // prośba o nick
-    public static final String SEND_COMMAND = "SEND:";
     public static final String ONE = "ONE";
     public static final String TWO = "TWO";
     public static final String THREE = "THREE";
@@ -31,5 +30,11 @@ public interface Protocol {
     public static final String BIG_STRIT = "BIG";
     public static final String CARRIAGE = "CARRIAGE";
     public static final String POKER = "POKER";
-    public static final String CHANCE = "CHANCE"; 
+    public static final String CHANCE = "CHANCE";
+    public static final String SUM = "SUM";
+    public static final String END_GAME = "END_GAME";
+    public static final String WINNER = "WINNER";
+    public static final String LOSER = "LOSER";
+    public static final String NEXT_PLAYER = "NEXT_PLAYER";
+    
 }
