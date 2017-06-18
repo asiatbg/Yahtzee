@@ -1,23 +1,15 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package yahtzee;
 
 public interface Protocol {
-    public static final String PLAYERS_COMMAND = "PLAYERS:"; // ile graczy ma grać
-    public static final String WAIT_COMMAND = "WAIT:"; // wait na kolej gracza
-    public static final String PLAY_COMMAND = "PLAY:"; // gracz może grać ;)a masło jest maślane.... 
-    public static final String ADD_COL_COMMAND = "ADD_COL:"; // dodanie kolumny z nickiem gracza
-    public static final String UPDATE_COL_COMMAND = "UPDATE_COL:"; // przesyła nowemu graczowi nicki graczy już zalogowanych
-    public static final String POST_COMMAND = "POST:"; // wysyłka wiadomości
-    public static final String NICKLIST_COMMAND = "LIST:"; // lista nicków
-    public static final String LOGIN_COMMAND = "LOGIN:"; // zalogowanie
-    public static final String LOGOUT_COMMAND = "LOGOUT:"; // wylogowanie
-    public static final String REMOVE_COL_COMMAND = "REMOVE:"; // usunięcie kolumny 
-    public static final String NICK_COMMAND = "NICK:"; // prośba o nick
-    public static final String SEND_COMMAND = "SEND:";
+    public static final String WAIT_COMMAND = "WAIT:"; 
+    public static final String PLAY_COMMAND = "PLAY:"; 
+    public static final String ADD_COL_COMMAND = "ADD_COL:"; 
+    public static final String UPDATE_COL_COMMAND = "UPDATE_COL:"; 
+    public static final String POST_COMMAND = "POST:"; 
+    public static final String LOGIN_COMMAND = "LOGIN:"; 
+    public static final String LOGOUT_COMMAND = "LOGOUT:"; 
+    public static final String NICK_COMMAND = "NICK:"; 
     public static final String ONE = "ONE";
     public static final String TWO = "TWO";
     public static final String THREE = "THREE";

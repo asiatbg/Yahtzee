@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package yahtzee;
 
 import java.awt.Color;
@@ -325,7 +321,7 @@ class YahtzeeClient extends JFrame implements Protocol{
                bDisconnect.setEnabled(false);
                bConnect.setEnabled(true);
                connected = false;
-               cleanTable();
+               clean();
                resetAllDices();
             }
             if (source == bThrow && bThrowClick == 0)
@@ -361,7 +357,7 @@ class YahtzeeClient extends JFrame implements Protocol{
             }    
         }
     }
-     public void cleanTable(){
+     public void clean(){
          tableModel.fireTableDataChanged();
          tableModel.setColumnCount(1);
          chat.setText("");
@@ -568,13 +564,11 @@ class YahtzeeClient extends JFrame implements Protocol{
         private Scanner in;
         private PrintWriter out;
         private String line;
-        int counter = 0;
-       
+
         public ClientThread (Socket s){
             socket = s;   
         }
-       
-        
+             
         @Override
         public void run(){
             try {
@@ -845,10 +839,6 @@ class YahtzeeClient extends JFrame implements Protocol{
         } 
     }        
 }
-
-
-
-
 
 
 public class Yahtzee{
