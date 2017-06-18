@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package yahtzee;
 
 import java.awt.BorderLayout;
@@ -29,18 +25,16 @@ import javax.swing.JTextField;
 import static yahtzee.Protocol.SUM;
 import static yahtzee.Protocol.WINNER;
  
-public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
+public class YahtzeeServer extends JFrame implements ActionListener{
     private JButton start;
     private JPanel panel;
-    private JTextField port, textField;
+    private JTextField port;
     private JLabel JLPort = new JLabel("Port: ");
-    private JLabel JLSend = new JLabel("Wyślij: ");
     private JTextArea statements; 
     private static final int PORT = 2345;
     private boolean started = false;  
     private  Server server;
-    private int counter = 0;
-   
+    private int counter = 0; 
     
     public YahtzeeServer(){
         super("Yahtzee Serwer");
@@ -66,11 +60,6 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
         add(panel, BorderLayout.NORTH);
         add(new JScrollPane(statements), BorderLayout.CENTER);
         
-        textField = new JTextField();
-     
-        add(JLSend, BorderLayout.SOUTH);
-        add(textField, BorderLayout.SOUTH); //co to?
-               
         setVisible(true);
     } 
 
@@ -125,8 +114,9 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
         statements.append(tekst + "\n");
         statements.setCaretPosition(statements.getDocument().getLength());
     }
-    
- class Game implements Protocol {
+}
+
+class Game implements Protocol {
     private ArrayList<Player> players = new ArrayList<>();
     private ArrayList<String> nicks = new ArrayList<>();
     private ArrayList<Integer> scores = new ArrayList<>();
@@ -288,7 +278,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
             return data;
         }
         
-        private void play(String protocol,  int userScore){
+        private void calculate(String protocol,  int userScore){
             int sum = 0;
             move();
             sum = userScore + scores.get(players.indexOf(this));
@@ -330,7 +320,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '1')
                                     userScore += 1;
                             }
-                            play(ONE,userScore);          
+                            calculate(ONE,userScore);          
                         }
                             if (line.startsWith(TWO) ) {
                             String receivedValues =  line.substring(TWO.length()) ;
@@ -340,7 +330,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '2')
                                     userScore += 2;
                             }
-                            play(TWO,userScore); 
+                            calculate(TWO,userScore); 
                         }
                         if (line.startsWith(THREE) ) {
                             String receivedValues =  line.substring(THREE.length()) ;
@@ -350,7 +340,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '3')
                                     userScore += 3;
                             }
-                            play(THREE,userScore); 
+                            calculate(THREE,userScore); 
                         }
                         if (line.startsWith(FOUR) ) {
                             String receivedValues =  line.substring(FOUR.length()) ;
@@ -360,7 +350,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '4')
                                     userScore += 4;
                             }
-                            play(FOUR,userScore); 
+                            calculate(FOUR,userScore); 
                         }
                         if (line.startsWith(FIVE) ) {
                            String receivedValues =  line.substring(FIVE.length()) ;
@@ -370,7 +360,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '5')
                                     userScore += 5;
                             }
-                            play(FIVE,userScore); 
+                            calculate(FIVE,userScore); 
                         }
                         if (line.startsWith(SIX) ) {
                             String receivedValues =  line.substring(SIX.length()) ;
@@ -380,7 +370,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 if(receivedValues.charAt(i) == '6')
                                     userScore += 6;
                             }
-                            play(SIX,userScore); 
+                            calculate(SIX,userScore); 
                         }
                         if (line.startsWith(PAIR) ) {
                             int userScore = 0;
@@ -397,7 +387,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 }
                             }
                             userScore += repeatedValue * 2;
-                            play(PAIR,userScore); 
+                            calculate(PAIR,userScore); 
                         }
                         if (line.startsWith(PAIRS) ) {
                             int userScore = 0;
@@ -429,7 +419,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                             }
                             
                             userScore += firstRepeatedValue * 2 + secondRepeatedValue * 2;
-                            play(PAIRS,userScore); 
+                            calculate(PAIRS,userScore); 
                         }
                         if (line.startsWith(TRIO) ) {
                             int userScore = 0;
@@ -452,7 +442,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                 }
                             }
                             userScore += repeatedValue * 3;
-                            play(TRIO, userScore);
+                            calculate(TRIO, userScore);
                         }
                         if (line.startsWith(SMALL_STRIT) ) {
                             int userScore = 0;
@@ -461,7 +451,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                     receivedValues.contains("4") && receivedValues.contains("5")) {
                                 userScore = 15;
                             }
-                            play(SMALL_STRIT,userScore); 
+                            calculate(SMALL_STRIT,userScore); 
                         }
                         if (line.startsWith(BIG_STRIT) ) {
                             int userScore = 0;
@@ -470,7 +460,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                                     receivedValues.contains("4") && receivedValues.contains("5")) {
                                 userScore = 20;
                             }
-                            play(BIG_STRIT,userScore); 
+                            calculate(BIG_STRIT,userScore); 
                         }
                         if (line.startsWith(CARRIAGE) ) {
                             int userScore = 0;
@@ -495,7 +485,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                             }
                             
                             userScore = (repeatedValue * 4) + (repeatedValue == 0 ? 0 : 20);
-                            play(CARRIAGE, userScore);
+                            calculate(CARRIAGE, userScore);
                         }
                         if (line.startsWith(POKER) ) {
                             int userScore = 0;
@@ -520,7 +510,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                             }
                             
                             userScore = (repeatedValue * 5) + (repeatedValue == 0 ? 0 : 50);
-                            play(POKER, userScore);
+                            calculate(POKER, userScore);
                         }
                         if (line.startsWith(CHANCE) ) {
                             int userScore = 0;
@@ -529,7 +519,7 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
                             for(int i = 0; i < receivedValues.length(); i++) {
                                 userScore += Character.getNumericValue(receivedValues.charAt(i));                            
                             }
-                            play(CHANCE, userScore);
+                            calculate(CHANCE, userScore);
                         }
                         if (line.startsWith(POST_COMMAND) ) {
                             line = line.substring(POST_COMMAND.length());
@@ -587,13 +577,6 @@ public class YahtzeeServer extends JFrame implements ActionListener, Protocol{
         }    
     }   
 }
-
-
- 
-}
-
-
-
 
 class Main{
    public static void main(String[] args ) {
